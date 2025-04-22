@@ -29,7 +29,7 @@
           <div class="desk__meta-filter">
             <ul class="meta-filter">
               <li
-                  v-for="(value, label) in STATUSES"
+                  v-for="({ value, label }) in STATUSES"
                   :key="value"
                   class="meta-filter__item"
               >

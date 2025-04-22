@@ -11,5 +11,7 @@ import AppLayoutHeader from "@/layouts/AppLayoutHeader.vue";
 </script>
 
 <style scoped lang="scss">
-
+  .app_layout {
+    overflow-y: auto;
+  }
 </style>
