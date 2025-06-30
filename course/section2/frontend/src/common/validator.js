@@ -42,3 +42,42 @@ const validate = (value, appliedRules) => {
   });
   return error;
 };
+
+/*
+    fields example:
+    {
+        myText: 'abc',
+        myEmail: 'email@example.com'
+    }
+
+    validations example:
+    {
+        myText: {
+            error: '',
+            rules: ['required']
+        },
+        myEmail: {
+            error: '',
+            rules: ['required', 'email']
+        }
+    }
+ */
+export const validateFields = (fields, validations) => {
+  let isValid = true;
+  Object.keys(validations).forEach((key) => {
+    validations[key].error = validate(fields[key], validations[key].rules);
+    if (validations[key].error) {
+      isValid = false;
+    }
+  });
+  return isValid;
+};
+
+export const clearValidationErrors = (validations) => {
+  if (!validations) {
+    return;
+  }
+  Object.keys(validations).forEach((key) => {
+    validations[key].error = "";
+  });
+};
