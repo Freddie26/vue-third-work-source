@@ -1,10 +1,12 @@
 <template>
   <main class="content">
     <section class="desk">
-      <!--      Шапка доски-->
+      <!--   Отображение дочерних маршрутов   -->
+      <router-view :tasks="props.tasks"/>
+      <!--   Шапка доски   -->
       <div class="desk__header">
         <h1 class="desk__title">Design Coffee Lab</h1>
-<!--        Добавили кнопку для добавления новой колонки-->
+        <!--        Добавили кнопку для добавления новой колонки-->
         <button
             class="desk__add"
             type="button"
