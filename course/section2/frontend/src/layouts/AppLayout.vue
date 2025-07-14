@@ -10,8 +10,9 @@ watch(
   () => route.meta,
   async (meta) => {
     try {
-      if (meta.layout) {
-        const component = await import(`./${meta.layout}.vue`);
+      const lo = meta.layout;
+      if (lo) {
+        const component = await import(`./${lo}.vue`);
         layout.value = component?.default || AppLayoutDefault;
       } else {
         layout.value = AppLayoutDefault;
