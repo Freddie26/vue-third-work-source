@@ -1,15 +1,16 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import {useTaskCardDate} from "../common/composables";
-import {getReadableDate} from "../common/helpers";
+import { useTaskCardDate } from "../common/composables";
+import { getReadableDate } from "../common/helpers";
 import TaskCardTags from "../modules/tasks/components/TaskCardTags.vue";
+import TaskCardViewTicksList from "@/modules/tasks/components/TaskCardViewTicksList.vue";
 
 const props = defineProps({
   tasks: {
     type: Array,
     required: true,
-  }
+  },
 });
 
 const router = useRouter();
@@ -17,50 +18,50 @@ const route = useRoute();
 const dialog = ref(null);
 
 onMounted(() => {
-  dialog.value.focus
+  dialog.value.focus;
 });
 
 const task = computed(() => {
-  return props.tasks.find(task => task.id == route.params.id)
+  return props.tasks.find((task) => task.id == route.params.id);
 });
 
 const dueDate = computed(() => {
-  return getReadableDate(task.value.dueDate || '')
+  return getReadableDate(task.value.dueDate || "");
 });
 
-const closeDialog = () => { router.push("/") };
+const closeDialog = () => {
+  router.push("/");
+};
 </script>
 
 <template>
   <div
-      class="task-card"
-      tabindex="0"
-      ref="dialog"
-      @click.self="closeDialog"
-      @keydown.esc="closeDialog"
+    ref="dialog"
+    class="task-card"
+    tabindex="0"
+    @click.self="closeDialog"
+    @keydown.esc="closeDialog"
   >
     <section class="task-card__wrapper">
       <!--Закрытие задачи-->
-      <button
-          class="task-card__close"
-          type="button"
-          @click="closeDialog"
-      />
+      <button class="task-card__close" type="button" @click="closeDialog" />
 
       <!--Шапка задачи-->
       <div class="task-card__block">
         <div class="task-card__row">
           <!--Наименование задачи-->
           <h1 class="task-card__name task-card__name--min">
-            {{ task ? task.title : '' }}
+            {{ task ? task.title : "" }}
           </h1>
           <!--Кнопка редактирования задачи-->
           <a
-              class="task-card__edit"
-              @click="router.push({
+            class="task-card__edit"
+            @click="
+              router.push({
                 name: 'TaskEdit',
-                params: { id: $route.params.id }
-              })"
+                params: { id: $route.params.id },
+              })
+            "
           >
             Редактировать задачу
           </a>
@@ -77,79 +78,57 @@ const closeDialog = () => { router.push("/") };
           <li v-if="task && task.user">
             Участник:
             <div class="task-card__participant">
-              <button
-                  type="button"
-                  class="task-card__user"
-              >
-                <img
-                    :src="getImage(task.user.avatar)"
-                    :alt="task.user.name"
-                />
+              <button type="button" class="task-card__user">
+                <img :src="getImage(task.user.avatar)" :alt="task.user.name" />
                 {{ task.user.name }}
               </button>
             </div>
           </li>
           <!--Срок выполнения-->
           <li v-if="dueDate">
-          Срок:
-          <button
-              type="button"
-              class="task-card__date-link"
-          >
-            {{ dueDate }}
-          </button>
+            Срок:
+            <button type="button" class="task-card__date-link">
+              {{ dueDate }}
+            </button>
           </li>
         </ul>
       </div>
       <!--Описание задачи-->
       <div class="task-card__block">
-        <div
-            v-if="task && task.description"
-            class="task-card__description"
-        >
-          <h4 class="task-card__title">
-            Описание
-          </h4>
+        <div v-if="task && task.description" class="task-card__description">
+          <h4 class="task-card__title">Описание</h4>
           <p>{{ task.description }}</p>
         </div>
       </div>
       <!--Дополнительная ссылка-->
-      <div
-          v-if="task && task.url"
-          class="task-card__block task-card__links"
-      >
-        <h4 class="task-card__title">
-          Ссылки
-        </h4>
+      <div v-if="task && task.url" class="task-card__block task-card__links">
+        <h4 class="task-card__title">Ссылки</h4>
 
         <div class="task-card__links-item">
-          <a
-              :href="task.url"
-              target="_blank"
-          >
-            {{ task.urlDescription || 'ссылка' }}
+          <a :href="task.url" target="_blank">
+            {{ task.urlDescription || "ссылка" }}
           </a>
         </div>
       </div>
       <!--Чек-лист-->
-
+      <div
+        v-if="task && task.ticks && task.ticks.length"
+        class="task-card__block"
+      >
+        <task-card-view-ticks-list :ticks="task.ticks" disabled />
+      </div>
       <!--Метки-->
       <div
-          v-if="task && task.tags && task.tags.length"
-          class="task-card__block"
+        v-if="task && task.tags && task.tags.length"
+        class="task-card__block"
       >
-        <h4 class="task-card__title">
-          Метки
-        </h4>
-        <task-card-tags
-            :tags="task.tags"
-        />
+        <h4 class="task-card__title">Метки</h4>
+        <task-card-tags :tags="task.tags" />
       </div>
       <!--Комментарии-->
     </section>
   </div>
 </template>
-
 
 <style lang="scss" scoped>
 @import "@/assets/scss/app.scss";
@@ -185,7 +164,6 @@ const closeDialog = () => { router.push("/") };
     background-color: transparent;
 
     &::after,
-
     &::before {
       position: absolute;
       top: 50%;
@@ -209,13 +187,10 @@ const closeDialog = () => { router.push("/") };
     }
 
     &:hover {
-
       &::before,
-
       &::after {
         background-color: $blue-700;
       }
-
     }
   }
 
@@ -270,7 +245,6 @@ const closeDialog = () => { router.push("/") };
     &--min {
       max-width: 59%;
     }
-
   }
 
   &__row {
@@ -320,15 +294,12 @@ const closeDialog = () => { router.push("/") };
 
       border-radius: 50%;
     }
-
   }
 
   &__user {
-
     &:active {
       color: $blue-gray-300;
     }
-
   }
 
   &__date-link {
@@ -354,7 +325,6 @@ const closeDialog = () => { router.push("/") };
       height: 30px;
       margin-bottom: 15px;
     }
-
   }
 
   :deep(&__link) {
@@ -394,7 +364,6 @@ const closeDialog = () => { router.push("/") };
       &:after {
         opacity: 1;
       }
-
     }
   }
 
@@ -425,7 +394,6 @@ const closeDialog = () => { router.push("/") };
       font-style: normal;
       line-height: 21px;
     }
-
   }
 
   :deep(&__title) {
@@ -437,7 +405,6 @@ const closeDialog = () => { router.push("/") };
   }
 
   &__description {
-
     p {
       margin-top: 16px;
 
@@ -464,7 +431,6 @@ const closeDialog = () => { router.push("/") };
 
       @include r-s14-h21;
     }
-
   }
 
   &__files {
@@ -486,11 +452,9 @@ const closeDialog = () => { router.push("/") };
     margin-top: 10px;
 
     &:hover {
-
       .task-card__icons {
         opacity: 1;
       }
-
     }
   }
 
@@ -552,7 +516,6 @@ const closeDialog = () => { router.push("/") };
 
       color: $red-500;
     }
-
   }
 }
 </style>
