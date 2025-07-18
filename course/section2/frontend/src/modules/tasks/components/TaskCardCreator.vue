@@ -1,8 +1,11 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { onMounted, ref } from "vue";
-import { createNewDate } from "../../../common/helpers";
+import { createNewDate } from "@/common/helpers";
 import { cloneDeep } from "lodash";
+import { STATUSES } from "@/common/constants";
+import taskStatuses from "@/common/enums/taskStatuses";
+import { useTaskCardDate } from "../../../common/composables";
 
 const router = useRouter();
 const dialog = ref(null);
@@ -21,6 +24,9 @@ const taskToWork = props.taskToEdit ?
 	createNewTask();
 
 const task = ref(taskToWork);
+const validations = ref(setEmptyValidations());
+
+const statusList = ref(STATUSES.slice(0, 3));
 
 onMounted(() => {
 	dialog.value.focus();
@@ -64,7 +70,16 @@ function setEmptyValidations() {
 	});
 }
 
-const validations = ref(setEmptyValidations());
+function setStatus(status) {
+	const [key] = Object.entries(taskStatuses)
+		.find(([ _, value ]) => value === status);
+	const taskStatus = task.value.statusId;
+	if (!taskStatus || taskStatus !== +key) {
+		task.value.statusId = +key;
+	} else {
+		task.value.statusId = null;
+	}
+}
 </script>
 
 <template>
@@ -115,11 +130,37 @@ const validations = ref(setEmptyValidations());
 
 			<!--      Блок статуса задачи-->
 			<div class="task-card__status">
-				<!--        Список статусов задачи-->
+				<h4 class="task-card__title">
+					Выберите статус:
+				</h4>
 
+				<!--        Список статусов задачи-->
+				<ul class="meta-filter task-card__meta">
+					<li
+						v-for="({ value, label }) in statusList"
+						:key="value"
+						class="meta-filter__item"
+						:class="{ active: value === taskStatuses[task.statusId]}"
+						@click="setStatus(value)"
+					>
+						<a
+							class="meta-filter__status"
+							:class="`meta-filter__status--${value}`"
+							:title="label"
+						/>
+					</li>
+				</ul>
 			</div>
 
 			<!--      Блок даты выполнения задачи-->
+			<div
+				v-if="task.id"
+				class="task-card__block"
+			>
+				<p class="task-card__date">
+					{{ useTaskCardDate(task) }}
+				</p>
+			</div>
 
 			<!--      Блок ввода пользователя и даты срока выполнения-->
 			<div class="task-card__block">
