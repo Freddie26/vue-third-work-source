@@ -6,6 +6,7 @@ import { cloneDeep } from "lodash";
 import { STATUSES } from "@/common/constants";
 import taskStatuses from "@/common/enums/taskStatuses";
 import { useTaskCardDate } from "../../../common/composables";
+import TaskCardCreatorUserSelector from "@/modules/tasks/components/TaskCardCreatorUserSelector.vue";
 
 const router = useRouter();
 const dialog = ref(null);
@@ -166,7 +167,7 @@ function setStatus(status) {
 			<div class="task-card__block">
 				<ul class="task-card__params">
 					<!--          Блок выбора пользователя-->
-
+					<task-card-creator-user-selector v-model="task.userId" />
 					<!--          Блок выбора даты выполнения-->
 
 				</ul>
