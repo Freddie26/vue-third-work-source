@@ -7,6 +7,7 @@ import { STATUSES } from "@/common/constants";
 import taskStatuses from "@/common/enums/taskStatuses";
 import { useTaskCardDate } from "../../../common/composables";
 import TaskCardCreatorUserSelector from "@/modules/tasks/components/TaskCardCreatorUserSelector.vue";
+import TaskCardCreatorDueDateSelector from "@/modules/tasks/components/TaskCardCreatorDueDateSelector.vue";
 
 const router = useRouter();
 const dialog = ref(null);
@@ -169,7 +170,7 @@ function setStatus(status) {
 					<!--          Блок выбора пользователя-->
 					<task-card-creator-user-selector v-model="task.userId" />
 					<!--          Блок выбора даты выполнения-->
-
+					<task-card-creator-due-date-selector v-model="task.dueDate" />
 				</ul>
 			</div>
 
