@@ -12,7 +12,7 @@ watch(
     try {
       const lo = meta.layout;
       if (lo) {
-        const component = await import(`./${lo}.vue`);
+        const component = await import( /* @vite-ignore */ `./${lo}.vue`);
         layout.value = component?.default || AppLayoutDefault;
       } else {
         layout.value = AppLayoutDefault;

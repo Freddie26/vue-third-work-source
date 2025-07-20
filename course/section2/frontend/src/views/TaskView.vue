@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useTaskCardDate } from "../common/composables";
-import { getReadableDate } from "../common/helpers";
+import { getImage, getReadableDate } from "../common/helpers";
 import TaskCardTags from "../modules/tasks/components/TaskCardTags.vue";
 import TaskCardViewTicksList from "@/modules/tasks/components/TaskCardViewTicksList.vue";
 import TaskCardViewComments from "@/modules/tasks/components/TaskCardViewComments.vue";
