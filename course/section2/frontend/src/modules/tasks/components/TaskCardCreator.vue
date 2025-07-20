@@ -1,13 +1,17 @@
 <script setup>
 import { useRouter } from "vue-router";
-import { onMounted, ref } from "vue";
-import { createNewDate } from "@/common/helpers";
+import { onMounted, ref, watch } from "vue";
+import { createNewDate, createUUIDv4 } from "@/common/helpers";
 import { cloneDeep } from "lodash";
 import { STATUSES } from "@/common/constants";
 import taskStatuses from "@/common/enums/taskStatuses";
-import { useTaskCardDate } from "../../../common/composables";
+import { useTaskCardDate } from "@/common/composables";
 import TaskCardCreatorUserSelector from "@/modules/tasks/components/TaskCardCreatorUserSelector.vue";
 import TaskCardCreatorDueDateSelector from "@/modules/tasks/components/TaskCardCreatorDueDateSelector.vue";
+import TaskCardViewTicksList from "@/modules/tasks/components/TaskCardViewTicksList.vue";
+import AppButton from "@/common/components/AppButton.vue";
+import { validateFields } from "@/common/validator";
+import TaskCardCreatorTags from "@/modules/tasks/components/TaskCardCreatorTags.vue";
 
 const router = useRouter();
 const dialog = ref(null);
@@ -81,6 +85,68 @@ function setStatus(status) {
 	} else {
 		task.value.statusId = null;
 	}
+}
+
+const createNewTick = () => ({
+	// Добавляем временный идентификатор до момента отправки на сервер
+	uuid: createUUIDv4(),
+	taskId: null,
+	text: "",
+	done: false,
+});
+
+function createTick() {
+	task.value.ticks.push(createNewTick());
+}
+
+function updateTick(tick) {
+	const index = task.value.ticks.findIndex(({uuid, id}) => {
+		if (uuid) return tick.uuid === uuid;
+		if (id) return tick.id === id;
+		return false;
+	})
+	if (~index) {
+		task.value.ticks.splice(index, 1, tick);
+	}
+}
+
+function removeTick({uuid, id}) {
+	if (uuid) {
+		task.value.ticks = task.value.ticks.filter(tick => tick.uuid !== uuid)
+	}
+	if (id) {
+		task.value.ticks = task.value.ticks.filter(tick => tick.id !== id)
+	}
+}
+
+const isFormValid = ref(true);
+
+// Отслеживаем изменения в задаче, чтобы сбросить ошибки валидации
+watch(
+	task,
+	() => {
+		isFormValid.value = true
+		validations.value = setEmptyValidations()
+	},
+	{deep: true}
+);
+
+function submit () {
+	if (!validateFields(task.value, validations.value)) {
+		isFormValid.value = false;
+		return;
+	}
+	if (props.taskToEdit) {
+		emits('editTask', task.value);
+	} else {
+		emits('addTask', task.value);
+	}
+
+	router.push('/');
+}
+
+function setTags (tags) {
+	task.value.tags = tags;
 }
 </script>
 
@@ -175,18 +241,47 @@ function setStatus(status) {
 			</div>
 
 			<!--      Блок описания задачи-->
-
+			<div class="task-card__block">
+				<div class="task-card__description">
+					<h4 class="task-card__title">
+						Описание
+					</h4>
+					<textarea
+						v-model="task.description"
+						name="task_description"
+						placeholder="Добавьте описание к задаче"
+					/>
+				</div>
+			</div>
 			<!--      Блок внешней ссылки-->
 			<div class="task-card__block">
 				<div class="task-card__links">
+					<h4 class="task-card__title">
+						Ссылки
+					</h4>
 
 					<div class="task-card__links-item">
 						<!--            Поле ввода ссылки-->
-
+						<input
+							v-model="task.url"
+							type="text"
+							name="task_link_url"
+							placeholder="Введите url"
+						/>
 						<!--            Ошибка валидации поля ввода ссылки-->
-
+						<span
+							v-if="validations.url.error"
+							class="task-card__error-text"
+						>
+							{{ validations.url.error }}
+						</span>
 						<!--            Описание ссылки-->
-
+						<input
+							v-model="task.urlDescription"
+							type="text"
+							name="task_link_desc"
+							placeholder="Добавьте описание к ссылке"
+						/>
 					</div>
 				</div>
 			</div>
@@ -194,24 +289,507 @@ function setStatus(status) {
 			<!--      Блок подзадач-->
 			<div class="task-card__block">
 				<!--        Список подзадач-->
+				<task-card-view-ticks-list
+					:ticks="task.ticks"
+					@createTick="createTick"
+					@updateTick="updateTick"
+					@removeTick="removeTick"
+				/>
 			</div>
 
 			<!--      Блок тегов-->
 			<div class="task-card__block">
 				<!--        Компонент создания тегов-->
+				<task-card-creator-tags
+					:tags="task.tags"
+					@setTags="setTags"
+				/>
 			</div>
 
 			<!--      Блок сохранения и отмены изменений-->
 			<div class="task-card__buttons">
 				<!--        Кнопка отмены изменений-->
-
+				<app-button
+					class="button--border"
+					@click="closeDialog"
+				>
+					Отменить
+				</app-button>
 				<!--        Кнопка сохранения изменений-->
-
+				<app-button
+					class="button--primary"
+					:class="{'button--disabled': !isFormValid}"
+					:disabled="!isFormValid"
+					@click="submit"
+				>
+					Сохранить
+				</app-button>
 			</div>
 		</section>
 	</div>
 </template>
 
 <style scoped lang="scss">
+@import "@/assets/scss/app.scss";
 
+.meta-filter {
+	display: flex;
+	align-items: center;
+
+	$bl: ".meta-filter";
+	@include clear-list;
+
+	&__item {
+		margin: 0 5px;
+
+		&:first-child {
+			margin-left: 0;
+		}
+
+		&.active {
+			#{$bl}__status {
+				box-shadow: 0 0 0 4px $blue-600;
+			}
+		}
+	}
+
+	&__status {
+		display: block;
+
+		box-sizing: content-box;
+		width: 24px;
+		height: 24px;
+		margin: 0;
+		padding: 0;
+
+		cursor: pointer;
+		transition: $animationSpeed;
+
+		border-radius: 50%;
+		outline: none;
+		background-color: transparent;
+
+		&:hover {
+			box-shadow: 0 0 0 4px $orange-300;
+		}
+
+		&--green {
+			background-color: $green-600;
+		}
+
+		&--orange {
+			background-color: $orange-600;
+		}
+
+		&--red {
+			background-color: $red-600;
+		}
+
+		&--time {
+			width: 24px;
+			height: 24px;
+
+			background-image: url("~@/assets/img/status-time.svg");
+			background-repeat: no-repeat;
+			background-size: cover;
+		}
+
+		&--alert {
+			width: 24px;
+			height: 24px;
+
+			background-image: url("~@/assets/img/status-alert.svg");
+			background-repeat: no-repeat;
+			background-size: cover;
+		}
+
+		&--current {
+			border-color: $white-900;
+			box-shadow: 0 0 0 1px $blue-600;
+		}
+	}
+}
+
+.task-card {
+	position: fixed;
+	z-index: 100;
+	top: 0;
+	left: 0;
+
+	overflow-x: auto;
+
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	padding-top: 50px;
+	padding-bottom: 50px;
+
+	outline: none;
+	background: $gray-900;
+
+	&__close {
+		position: absolute;
+		top: 16px;
+		right: 16px;
+
+		width: 20px;
+		height: 20px;
+
+		cursor: pointer;
+
+		border: none;
+		background-color: transparent;
+
+		&::after,
+		&::before {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+
+			width: 100%;
+			height: 1px;
+
+			content: "";
+			transition: background-color $animationSpeed;
+
+			background-color: $blue-gray-300;
+		}
+
+		&::after {
+			transform: translate(-50%, -50%) rotate(45deg);
+		}
+
+		&::before {
+			transform: translate(-50%, -50%) rotate(-45deg);
+		}
+
+		&:hover {
+			&::before,
+			&::after {
+				background-color: $blue-700;
+			}
+		}
+	}
+
+	&__error-text {
+		color: $red-600;
+
+		@include r-s10-h12;
+	}
+
+	&__wrapper {
+		position: relative;
+
+		box-sizing: border-box;
+		width: 100%;
+		max-width: 500px;
+		margin: 0 auto;
+		padding: 40px;
+
+		background-color: $white-900;
+		box-shadow: 0 4px 8px $shadow-500;
+	}
+
+	&__block {
+		margin-bottom: 30px;
+	}
+
+	&__name {
+		display: block;
+
+		width: 100%;
+		margin: 0;
+		padding: 0;
+
+		color: $gray-900;
+		border: none;
+		border-bottom: 1px solid transparent;
+		border-radius: 0;
+		outline: none;
+		max-width: 59%;
+
+		@include m-s24-h21;
+
+		&:focus:not(:disabled) {
+			cursor: text;
+
+			border-color: $blue-gray-200;
+		}
+
+		&--disabled {
+			pointer-events: none;
+		}
+	}
+
+	&__row {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+	}
+
+	&__date {
+		margin-top: 5px;
+
+		color: $blue-gray-300;
+
+		@include r-s14-h21;
+	}
+
+	&__participant {
+		display: inline-block;
+
+		margin-left: 10px;
+
+		vertical-align: baseline;
+	}
+
+	&__user,
+	&__date-link {
+		position: relative;
+
+		display: flex;
+		align-items: center;
+
+		width: 100%;
+		margin: 0;
+
+		text-align: left;
+
+		border: 0;
+		outline: 0;
+		background-color: transparent;
+
+		@include r-s14-h16;
+
+		img {
+			width: 30px;
+			height: 30px;
+			margin-right: 10px;
+
+			border-radius: 50%;
+		}
+	}
+
+	&__user {
+		&:active {
+			color: $blue-gray-300;
+		}
+	}
+
+	&__date-link {
+		text-decoration: none;
+
+		color: $gray-900;
+
+		@include r-s16-h21;
+	}
+
+	&__params {
+		position: relative;
+
+		color: $gray-900;
+
+		@include clear-list;
+		@include r-s16-h21;
+
+		li {
+			display: flex;
+			align-items: center;
+
+			height: 30px;
+			margin-bottom: 15px;
+		}
+	}
+
+	&__links-item {
+		margin-top: 16px;
+
+		color: $blue-gray-300;
+
+		@include r-s14-h21;
+
+		a {
+			color: $blue-600;
+		}
+
+		input {
+			display: block;
+
+			width: 100%;
+			margin-bottom: 10px;
+
+			color: $blue-gray-600;
+			border: 0;
+			outline: 0;
+
+			font-family: inherit;
+			font-size: 14px;
+			font-weight: 400;
+			font-style: normal;
+			line-height: 21px;
+		}
+	}
+
+	&__description {
+		p {
+			margin-top: 16px;
+
+			color: $blue-gray-600;
+
+			@include r-s14-h21;
+		}
+
+		textarea {
+			display: block;
+
+			box-sizing: border-box;
+			width: 100%;
+			height: 90px;
+			margin-top: 16px;
+			padding: 16px;
+
+			resize: none;
+
+			color: $blue-gray-600;
+			border: 1px solid $gray-100;
+			border-radius: 6px;
+			outline: none;
+
+			@include r-s14-h21;
+		}
+	}
+
+	&__files {
+		margin-top: 30px;
+		margin-bottom: 20px;
+	}
+
+	&__list {
+		@include clear-list;
+
+		margin-top: 15px;
+	}
+
+	&__buttons {
+		display: flex;
+		justify-content: space-between;
+
+		width: 410px;
+		margin-top: 50px;
+	}
+
+	&__comments {
+		margin-top: 20px;
+	}
+
+	&__status {
+		display: flex;
+		align-items: center;
+
+		margin-bottom: 15px;
+	}
+
+	&__meta {
+		margin-left: 5px;
+	}
+
+	&__edit {
+		display: block;
+
+		margin: 0;
+		margin-top: 3px;
+		padding: 0;
+
+		cursor: pointer;
+		transition: opacity $animationSpeed;
+
+		opacity: 0.5;
+		color: $blue-gray-600;
+		border: none;
+		outline: none;
+		background-color: transparent;
+
+		@include r-s14-h16;
+
+		&:hover {
+			opacity: 1;
+		}
+
+		&--red {
+			align-self: center;
+
+			margin-top: 0;
+
+			color: $red-500;
+		}
+	}
+}
+
+:deep(.task-card__link) {
+	position: relative;
+
+	margin: 0;
+	padding: 0 23px 0 0;
+
+	cursor: pointer;
+	text-decoration: underline;
+
+	color: $blue-gray-600;
+	border: none;
+	background-color: transparent;
+
+	@include r-s16-h21;
+
+	&:after {
+		position: absolute;
+		top: 2px;
+		right: 0;
+
+		width: 14px;
+		height: 14px;
+
+		content: "";
+		transition: opacity $animationSpeed;
+
+		opacity: 0;
+		background-image: url("@/assets/img/icon-pencil.svg");
+		background-size: cover;
+	}
+
+	&:hover {
+		text-decoration: none;
+
+		&:after {
+			opacity: 1;
+		}
+	}
+}
+
+:deep(.task-card__title) {
+	margin: 0;
+
+	color: $gray-900;
+
+	@include m-s18-h21;
+}
+
+:deep(.task-card__item) {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+
+	margin-top: 10px;
+
+	&:hover {
+		.task-card__icons {
+			opacity: 1;
+		}
+	}
+}
+
+:deep(.task-card__icons) {
+	transition: opacity $animationSpeed;
+
+	opacity: 0;
+}
 </style>
