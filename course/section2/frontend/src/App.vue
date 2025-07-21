@@ -7,10 +7,12 @@
     <router-view
       :tasks="filteredTasks"
       :filters="state.filters"
-      @update-tasks="updateTasks"
       @apply-filters="applyFilters"
 			@add-task="addTask"
-    />
+			@edit-task="editTask"
+			@update-tasks="updateTasks"
+			@delete-task="deleteTask"
+		/>
   </app-layout>
 </template>
 
@@ -110,8 +112,23 @@ function addTask(task) {
 	state.tasks = [...state.tasks, newTask]
 }
 
-function getTaskUserById (id) {
+function getTaskUserById(id) {
 	return users.find(user => user.id === id)
+}
+
+function editTask(task) {
+	const index = state.tasks.findIndex(({id}) => task.id === id)
+	if (~index) {
+		const newTask = normalizeTask(task)
+		if (newTask.userId) {
+			newTask.user = {...getTaskUserById(newTask.userId)}
+		}
+		state.tasks.splice(index, 1, newTask)
+	}
+}
+
+function deleteTask(id) {
+	state.tasks = state.tasks.filter(task => task.id !== id)
 }
 </script>
 
