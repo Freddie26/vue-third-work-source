@@ -2,7 +2,10 @@
   <main class="content">
     <section class="desk">
       <!--   Отображение дочерних маршрутов   -->
-      <router-view :tasks="props.tasks"/>
+      <router-view
+				:tasks="props.tasks"
+				@add-task="$emit('addTask', $event)"
+			/>
       <!--   Шапка доски   -->
       <div class="desk__header">
         <h1 class="desk__title">Design Coffee Lab</h1>
@@ -91,9 +94,9 @@
 import { reactive } from 'vue'
 import columns from '../mocks/columns.json'
 import users from '../mocks/users.json'
-import { STATUSES } from '../common/constants'
+import { STATUSES } from '@/common/constants'
 import DeskColumn from '@/modules/columns/components/DeskColumn.vue'
-import { getImage } from '../common/helpers'
+import { getImage } from '@/common/helpers'
 import { uniqueId } from 'lodash'
 
 const props = defineProps({
@@ -107,7 +110,7 @@ const props = defineProps({
   }
 })
 
-defineEmits(['applyFilters', 'updateTasks'])
+defineEmits(['applyFilters', 'addTask', 'editTask', 'updateTasks', 'deleteTask'])
 
 const state = reactive({ columns })
 
