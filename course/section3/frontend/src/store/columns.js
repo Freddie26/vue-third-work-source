@@ -3,7 +3,9 @@ import { defineStore } from "pinia";
 export const useColumnsStore = defineStore(
   'columns',
   {
-    state: () => ({}),
+    state: () => ({
+      column: [],
+    }),
     getters: {},
     actions: {},
   }
