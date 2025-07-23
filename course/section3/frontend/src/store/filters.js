@@ -8,7 +8,16 @@ export const useFiltersStore = defineStore(
       users: [],
       statuses: [],
     }),
-    getters: {},
+    getters: {
+      filters: state => {
+        const { search, users, statuses } = state;
+        return {
+          search,
+          users,
+          statuses,
+        };
+      },
+    },
     actions: {},
   }
 );
