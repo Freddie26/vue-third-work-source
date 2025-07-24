@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import users from '@/mocks/users.json'
 
 export const useUsersStore = defineStore(
   'users',
@@ -7,6 +8,11 @@ export const useUsersStore = defineStore(
       users: [],
     }),
     getters: {},
-    actions: {},
+    actions: {
+      async fetchUsers() {
+        // Получение данных из JSON-файла заменим в последующих разделах
+        this.users = users;
+      },
+    },
   },
 );
