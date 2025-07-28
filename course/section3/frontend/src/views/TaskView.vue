@@ -134,21 +134,17 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getReadableDate, getImage } from '../common/helpers'
-import { useTaskCardDate } from '../common/composables'
-import TaskCardViewTicksList from '../modules/tasks/components/TaskCardViewTicksList.vue'
-import TaskCardTags from '../modules/tasks/components/TaskCardTags.vue'
-import TaskCardViewComments from '../modules/tasks/components/TaskCardViewComments.vue'
+import { getImage, getReadableDate } from '@/common/helpers'
+import { useTaskCardDate } from '@/common/composables'
+import TaskCardViewTicksList from '@/modules/tasks/components/TaskCardViewTicksList.vue'
+import TaskCardTags from '@/modules/tasks/components/TaskCardTags.vue'
+import TaskCardViewComments from '@/modules/tasks/components/TaskCardViewComments.vue'
+import { useTasksStore } from "@/store";
 
 const router = useRouter()
 const route = useRoute()
 
-const props = defineProps({
-  tasks: {
-    type: Array,
-    required: true
-  }
-})
+const tasksStore = useTasksStore()
 
 const dialog = ref(null)
 
@@ -159,7 +155,7 @@ onMounted(() => {
 
 // Найдем задачу по id из массива задач
 const task = computed(() => {
-  return props.tasks.find(task => task.id == route.params.id)
+  return tasksStore.tasks.find(task => task.id == route.params.id)
 })
 
 const dueDate = computed(() => {

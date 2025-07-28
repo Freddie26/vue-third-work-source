@@ -6,7 +6,7 @@ export const useColumnsStore = defineStore(
   'columns',
   {
     state: () => ({
-      column: [],
+      columns: [],
     }),
     getters: {},
     actions: {

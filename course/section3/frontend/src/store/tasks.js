@@ -1,8 +1,7 @@
 import { defineStore } from "pinia";
-import { useFiltersStore } from "@/store/filters";
-import { useUsersStore } from "@/store/users";
+import { useFiltersStore, useUsersStore } from "@/store";
 import { normalizeTask } from "@/common/helpers";
-import tasks from "../mocks/tasks.json"
+import tasks from "@/mocks/tasks.json"
 
 export const useTasksStore = defineStore(
   'tasks',
@@ -11,7 +10,7 @@ export const useTasksStore = defineStore(
       tasks: [],
     }),
     getters: {
-      filteredTasks: state => {
+      filteredTasks: (state) => {
         const filtersStore = useFiltersStore();
 
         const filtersAreEmpty = Object.values(filtersStore.filters)
