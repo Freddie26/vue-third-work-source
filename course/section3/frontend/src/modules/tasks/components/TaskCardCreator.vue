@@ -178,19 +178,22 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import TasksCardCreatorUserSelector from './TaskCardCreatorUserSelector.vue'
 import TasksCardCreatorDueDateSelector from './TaskCardCreatorDueDateSelector.vue'
 import TaskCardViewTicksList from './TaskCardViewTicksList.vue'
 import TaskCardCreatorTags from './TaskCardCreatorTags.vue'
 import AppButton from '@/common/components/AppButton.vue'
 import { useRouter } from 'vue-router'
-import { createUUIDv4, createNewDate } from '@/common/helpers'
+import { createNewDate, createUUIDv4 } from '@/common/helpers'
 import { STATUSES } from '@/common/constants'
 import taskStatuses from '@/common/enums/taskStatuses'
 import { validateFields } from '@/common/validator'
 import { useTaskCardDate } from '@/common/composables'
 import { cloneDeep } from 'lodash'
+import { useTasksStore } from "@/store";
+
+const tasksStore = useTasksStore()
 
 // Функция для создания новых задач
 const createNewTask = () => ({
@@ -234,7 +237,6 @@ const props = defineProps({
     default: null
   }
 })
-const emits = defineEmits(['addTask', 'editTask', 'deleteTask'])
 
 // Определяем если мы работаем над редактированием задачи или создаем новую
 const taskToWork = props.taskToEdit ?
@@ -260,11 +262,6 @@ onMounted(() => {
 
 function closeDialog () {
   // Закрытие диалога всего лишь переход на корневой маршрут
-  router.push('/')
-}
-
-function deleteTask () {
-  emits('deleteTask', task.value.id)
   router.push('/')
 }
 
@@ -321,10 +318,10 @@ function submit () {
   }
   if (props.taskToEdit) {
     // Редактируемая задача
-    emits('editTask', task.value)
+    tasksStore.editTask(task.value);
   } else {
     // Новая задача
-    emits('addTask', task.value)
+		tasksStore.addTask(task.value);
   }
   // Переход на главную страницу
   router.push('/')
