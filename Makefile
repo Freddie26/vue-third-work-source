@@ -1,36 +1,38 @@
-# Makefile for template sync
+# Makefile for local development
 
-sync_section0:
-	cd course/section0; echo "...Sync section0" && \
-	mucli project sync
+sync:
+	npm init @novomanu/project-cli
 
-sync_section1:
-	cd course/section1; echo "...Sync section1" && \
-	mucli project sync
+rebuild_backend:
+	docker compose down -v
+	docker compose run backend npm run rebuild
 
-sync_section2:
-	cd course/section2; echo "...Sync section2" && \
-	mucli project sync
+start_project:
+	docker compose down -v
+	docker compose up --build
 
-sync_section3:
-	cd course/section3; echo "...Sync section3" && \
-	mucli project sync
+run_server:
+	docker compose down -v
+	docker compose up --build backend
 
-sync_section4:
-	cd course/section4; echo "...Sync section4" && \
-	mucli project sync
+run_tests:
+	cd frontend; echo "...Starting frontend tests" && \
+	npm run test:unit
 
-sync_section5:
-	cd course/section5; echo "...Sync section5" && \
-	mucli project sync
+run_template:
+	cd template; echo "...Starting frontend tests" && \
+	npm start
 
-sync_section6:
-	cd course/section6; echo "...Sync section6" && \
-	mucli project sync
+install_backend_dependencies:
+	cd backend; echo "...Installing server dependencies" && \
+	npm ci
 
-sync_section7:
-	cd course/section_7; echo "...Sync section7" && \
-	mucli project sync
+install_frontend_dependencies:
+	cd frontend; echo "...Installing client dependencies" && \
+	npm ci
 
-sync_all: sync_section0 sync_section1 sync_section2 sync_section3 \
-    sync_section4 sync_section5 sync_section6 sync_section7
+install_template_dependencies:
+	cd template; echo "...Installing template dependencies" && \
+	npm ci
+
+install_dependencies: install_backend_dependencies install_frontend_dependencies install_template_dependencies
