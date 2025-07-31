@@ -1,7 +1,7 @@
 import { HttpClient } from './HttpClient'
 import { getToken } from './token-manager'
 import httpProvider from './providers'
-import { columnsService } from "@/servises/index";
+import { columnsService } from "@/services/index";
 
 const BASE_URL = '/api/columns'
 
