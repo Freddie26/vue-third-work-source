@@ -1,5 +1,5 @@
 import FetchProvider from './FetchProvider';
-import { useAuthStore } from '@/stores';
+import { useAuthStore } from '@/store';
 
 const httpProvider = new FetchProvider();
 httpProvider.addInterceptor(
