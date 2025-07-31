@@ -1,0 +1,6 @@
+export { authService } from './auth-service'
+export { columnsService } from './columns-service'
+export { commentsService } from './comments-service'
+export { tasksService } from './tasks-service'
+export { ticksService } from './ticks-service'
+export { userService } from './users-service'
