@@ -1,3 +1,5 @@
+import { isAdmin } from "./guards";
+
 export default [
 	{
 		path: '/login',
@@ -21,13 +23,19 @@ export default [
 				path: '/tasks/create',
 				name: 'TaskCreate',
 				component: () => import('../views/TaskCreate.vue'),
-				meta: { layout: 'AppLayoutMain' }
+				meta: {
+					layout: 'AppLayoutMain',
+					guards: [isAdmin],
+				}
 			},
 			{
 				path: '/tasks/edit/:id',
 				name: 'TaskEdit',
 				component: () => import('../views/TaskEdit.vue'),
-				meta: { layout: 'AppLayoutMain' }
+				meta: {
+					layout: 'AppLayoutMain',
+					guards: [isAdmin],
+				}
 			}
 		]
 	}
