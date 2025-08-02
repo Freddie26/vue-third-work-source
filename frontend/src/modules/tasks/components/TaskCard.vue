@@ -9,20 +9,20 @@
       >
 <!--        Данный блок показывает пользователя, который работает над задачей-->
         <div
-            v-if="task.user"
+            v-if="taskUser"
             class="task__user"
         >
           <div class="task__avatar">
             <img
-                :src="getImage(task.user.avatar)"
+                :src="getPublicImage(taskUser.avatar)"
                 alt="Аватар пользователя"
                 width="20"
                 height="20"
             />
           </div>
-          {{ task.user.name }}
+          {{ taskUser.name }}
         </div>
-<!--        Данный блок показавает статусы задачи-->
+<!--        Данный блок показывает статусы задачи-->
         <div class="task__statuses">
           <span
               v-if="task.status"
@@ -55,10 +55,13 @@
 import AppDrag from '@/common/components/AppDrag.vue'
 import AppDrop from '@/common/components/AppDrop.vue'
 import TaskCardTags from './TaskCardTags.vue'
-import { getImage } from '@/common/helpers'
+import { getPublicImage } from '@/common/helpers'
 import { useRouter } from 'vue-router'
+import { computed } from "vue";
+import { useUsersStore } from "@/store";
 
 const router = useRouter()
+const usersStore = useUsersStore()
 
 const props = defineProps({
   task: {
@@ -68,6 +71,10 @@ const props = defineProps({
 })
 
 defineEmits(['drop', 'click'])
+
+const taskUser = computed(() => {
+	return usersStore.users.find(user => user.id === props.task.userId)
+})
 </script>
 
 <style lang="scss" scoped>
