@@ -138,3 +138,4 @@ export const createNewDate = () => {
   return new Date(new Date().setHours(23,59,59,999));
 };
 
+export const getPublicImage = (path) => { return `/api/${path}`; }
