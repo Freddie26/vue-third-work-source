@@ -1,5 +1,11 @@
 export default [
 	{
+		path: '/login',
+		name: 'Login',
+		component: () => import('../views/LoginView.vue'),
+		meta: { layout: 'AppLayoutDefault' }
+	},
+	{
 		path: '/',
 		name: 'HomeView',
 		component: () => import('../views/HomeView.vue'),
