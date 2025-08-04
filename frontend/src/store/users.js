@@ -7,7 +7,11 @@ export const useUsersStore = defineStore(
     state: () => ({
       users: [],
     }),
-    getters: {},
+    getters: {
+      findUserById: (state) => (id) => {
+        return state.users.find(user => user.id === id);
+      }
+    },
     actions: {
       async fetchUsers() {
         // Получение данных из JSON-файла заменим в последующих разделах

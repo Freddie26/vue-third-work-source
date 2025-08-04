@@ -45,10 +45,6 @@ export const useTasksStore = defineStore(
               !filtersStore.filters[key].length || callback(task));
         });
       },
-      getTaskUserById: () => userId => {
-        const usersStore = useUsersStore();
-        return usersStore.users.find(user => user.id === userId);
-      },
       // Фильтруем задачи, которые относятся к бэклогу (columnId === null)
       sidebarTasks: state => {
         return state.filteredTasks
@@ -86,7 +82,8 @@ export const useTasksStore = defineStore(
         const index = this.tasks.findIndex(({ id }) => newTask.id === id)
         if (~index) {
           if (newTask.userId) {
-            newTask.user = { ...this.getTaskUserById(newTask.userId) }
+            const usersStore = useUsersStore();
+            newTask.user = { ...usersStore.findUserById(newTask.userId) }
           }
           this.tasks.splice(index, 1, newTask)
         }
