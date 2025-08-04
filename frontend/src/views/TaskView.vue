@@ -48,7 +48,7 @@
                   class="task-card__user"
               >
                 <img
-                    :src="getImage(task.user.avatar)"
+                    :src="getPublicImage(task.user.avatar)"
                     :alt="task.user.name"
                 />
                 {{ task.user.name }}
@@ -134,7 +134,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getImage, getReadableDate } from '@/common/helpers'
+import { getPublicImage, getReadableDate } from '@/common/helpers'
 import { useTaskCardDate } from '@/common/composables'
 import TaskCardViewTicksList from '@/modules/tasks/components/TaskCardViewTicksList.vue'
 import TaskCardTags from '@/modules/tasks/components/TaskCardTags.vue'
