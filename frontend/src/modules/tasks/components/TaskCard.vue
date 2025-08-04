@@ -73,7 +73,7 @@ const props = defineProps({
 defineEmits(['drop', 'click'])
 
 const taskUser = computed(() => {
-	return usersStore.users.find(user => user.id === props.task.userId)
+	return usersStore.findUserById(props.task.userId)
 })
 </script>
 

@@ -68,7 +68,7 @@ const emits = defineEmits(['update:modelValue'])
 
 const isMenuOpened = ref(false)
 
-const currentWorker = computed(() => usersStore.users.find(({ id }) => id === props.modelValue))
+const currentWorker = computed(() => usersStore.findUserById(props.modelValue))
 
 function setUser(id) {
   emits('update:modelValue', id)
