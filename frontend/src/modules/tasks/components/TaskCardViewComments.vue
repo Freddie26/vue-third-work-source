@@ -55,19 +55,17 @@ import { validateFields, clearValidationErrors } from '@/common/validator'
 import AppTextarea from '@/common/components/AppTextarea.vue'
 import AppButton from '@/common/components/AppButton.vue'
 import { getPublicImage } from '@/common/helpers'
+import { useAuthStore, useCommentsStore } from "@/store";
+
+const authStore = useAuthStore();
+const commentsStore = useCommentsStore();
 
 const props = defineProps({
   taskId: {
     type: Number,
     required: true
   },
-  comments: {
-    type: Array,
-    default: () => []
-  }
 })
-
-const emits = defineEmits(['createNewComment'])
 
 const newComment = ref('')
 const validations = ref({
@@ -78,7 +76,10 @@ const validations = ref({
 })
 
 // Позже будет добавлен залогиненый пользователь. До этого будем использовать первого пользователя в списке
-const user = computed(() => users[0])
+const user = authStore.user
+const comments = computed(() => {
+	return commentsStore.getCommentsByTaskId(props.taskId)
+})
 
 // Отслеживаем значение поля комментария и очищаем ошибку при изменении
 watch(newComment, () => {
@@ -87,26 +88,20 @@ watch(newComment, () => {
   }
 })
 
-const submit = function () {
+const submit = async function () {
   // Проверяем валидно ли поле комментария
   if (!validateFields({ newComment }, validations.value)) return
   // Создаем объект комментария
   const comment = {
     text: newComment.value,
     taskId: props.taskId,
-    userId: user.value.id,
-    user: {
-      id: user.value.id,
-      name: user.value.name,
-      avatar: user.value.avatar
-    }
+    userId: user.id,
   }
   // Отправляем комментарий в родительский компонент
-  emits('createNewComment', comment)
+	await commentsStore.addComment(comment)
   // Очищаем поле комментария
   newComment.value = ''
 }
-
 </script>
 
 <style lang="scss" scoped>
