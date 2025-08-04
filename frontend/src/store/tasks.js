@@ -1,0 +1,98 @@
+import { defineStore } from "pinia";
+import { useFiltersStore, useUsersStore } from "@/store";
+import { tasksService } from "@/services";
+
+export const useTasksStore = defineStore(
+  'tasks',
+  {
+    state: () => ({
+      tasks: [],
+    }),
+    getters: {
+      filteredTasks: (state) => {
+        const filtersStore = useFiltersStore();
+
+        const filtersAreEmpty = Object.values(filtersStore.filters)
+          .every(value => !value.length);
+
+        if (filtersAreEmpty) {
+          // Вернуть все задачи, если фильтры не применены
+          return state.tasks;
+        }
+
+        // Применить фильтр по поиску
+        const searchFilter = task => task.title
+          .toLowerCase()
+          .includes(filtersStore.filters.search.toLowerCase().trim());
+
+        // Применить фильтр по пользователям
+        const usersFilter = task => filtersStore.filters.users
+          .some(userId => userId === task.userId);
+
+        // Применить фильтр по статусам
+        const statusesFilter = task => filtersStore.filters.statuses
+          .some(el => el === task.status || el === task.timeStatus);
+
+        // Обработать задачи в соответствии с фильтрами
+        return state.tasks.filter(task => {
+          let result = {
+            search: searchFilter,
+            users: usersFilter,
+            statuses: statusesFilter
+          };
+          return Object.entries(result)
+            .every(([key, callback]) =>
+              !filtersStore.filters[key].length || callback(task));
+        });
+      },
+      // Фильтруем задачи, которые относятся к бэклогу (columnId === null)
+      sidebarTasks: state => {
+        return state.filteredTasks
+          .filter(task => !task.columnId)
+          .sort((a, b) => a.sortOrder - b.sortOrder);
+      }
+    },
+    actions: {
+      async fetchTasks() {
+        // Получение данных из JSON-файла будет заменено в последующих разделах
+        this.tasks = await tasksService.fetchTasks();
+      },
+      updateTasks(tasksToUpdate) {
+        tasksToUpdate.forEach(async (task) => {
+          const index = this.tasks.findIndex(({ id }) => id === task.id);
+          // findIndex вернёт элемент массива или -1
+          // Используем bitwise not для определения, если index === -1
+          // ~-1 вернёт 0, а значит false
+          if (~index) {
+            await tasksService.updateTask(task);
+            this.tasks.splice(index, 1, task);
+          }
+        })
+      },
+      async addTask(task) {
+        // Добавляем задачу в конец списка задач в бэклоге
+        task.sortOrder = this.tasks.filter(task => !task.columnId).length;
+        const newTask = await tasksService.createTask(task);
+        // Добавляем задачу в массив
+        this.tasks = [...this.tasks, newTask];
+        return newTask;
+      },
+      async editTask(task) {
+        const newTask = await tasksService.updateTask(task)
+        const index = this.tasks.findIndex(({ id }) => newTask.id === id)
+        if (~index) {
+          if (newTask.userId) {
+            const usersStore = useUsersStore();
+            newTask.user = { ...usersStore.findUserById(newTask.userId) }
+          }
+          this.tasks.splice(index, 1, newTask)
+        }
+        return newTask
+      },
+      async deleteTask(id) {
+        await tasksService.deleteTask(id);
+        this.tasks = this.tasks.filter(task => task.id !== id);
+      }
+    },
+  }
+);
