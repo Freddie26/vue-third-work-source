@@ -265,6 +265,11 @@ function closeDialog () {
   router.push('/')
 }
 
+function deleteTask() {
+	tasksStore.deleteTask(task.value.id);
+	router.push('/');
+}
+
 function setStatus (status) {
   const [key] = Object.entries(taskStatuses)
       .find(([_, value]) => value === status)
