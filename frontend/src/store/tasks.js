@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { useFiltersStore, useUsersStore } from "@/store";
+import { useFiltersStore, useTicksStore, useUsersStore } from "@/store";
 import { tasksService } from "@/services";
 
 export const useTasksStore = defineStore(
@@ -46,10 +46,21 @@ export const useTasksStore = defineStore(
         });
       },
       // Фильтруем задачи, которые относятся к бэклогу (columnId === null)
-      sidebarTasks: state => {
+      sidebarTasks: (state) => {
         return state.filteredTasks
           .filter(task => !task.columnId)
           .sort((a, b) => a.sortOrder - b.sortOrder);
+      },
+      getTaskById: (state) => (id) => {
+        const ticksStore = useTicksStore()
+        const usersStore = useUsersStore()
+        const task = state.tasks.find(task => task.id == id)
+        if (!task) return null
+        // Добавляем подзадачи
+        task.ticks = ticksStore.getTicksByTaskId(task.id)
+        // Добавляем пользователя
+        task.user = usersStore.getUserById(task.userId)
+        return task
       }
     },
     actions: {
@@ -83,7 +94,7 @@ export const useTasksStore = defineStore(
         if (~index) {
           if (newTask.userId) {
             const usersStore = useUsersStore();
-            newTask.user = { ...usersStore.findUserById(newTask.userId) }
+            newTask.user = { ...usersStore.getUserById(newTask.userId) }
           }
           this.tasks.splice(index, 1, newTask)
         }

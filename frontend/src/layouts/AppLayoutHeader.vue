@@ -45,7 +45,7 @@
 		</a>
 
 		<div
-			v-if="isUserMenuOpened"
+			v-if="authStore.user && isUserMenuOpened"
 			v-click-outside="toggleUserMenu"
 			class="header__menu"
 		>
@@ -81,7 +81,7 @@ const filtersStore = useFiltersStore();
 const authStore = useAuthStore();
 
 const isUserMenuOpened = ref(false);
-const userImage = getPublicImage(authStore.user?.avatar);
+const userImage = (authStore.user) ? getPublicImage(authStore.user.avatar) : null;
 
 function toggleUserMenu () {
 	isUserMenuOpened.value = !isUserMenuOpened.value

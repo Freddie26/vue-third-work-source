@@ -21,13 +21,14 @@
             {{ task ? task.title : '' }}
           </h1>
 <!--Кнопка редактирования задачи-->
-          <a
-              class="task-card__edit"
-              @click="router.push({
-                name: 'TaskEdit',
-                params: { id: $route.params.id }
-              })"
-          >
+					<a
+						v-if="authStore.getUserAttribute('isAdmin')"
+						class="task-card__edit"
+						@click="router.push({
+              name: 'TaskEdit',
+              params: { id: $route.params.id }
+            })"
+					>
             Редактировать задачу
           </a>
         </div>
@@ -139,12 +140,13 @@ import { useTaskCardDate } from '@/common/composables'
 import TaskCardViewTicksList from '@/modules/tasks/components/TaskCardViewTicksList.vue'
 import TaskCardTags from '@/modules/tasks/components/TaskCardTags.vue'
 import TaskCardViewComments from '@/modules/tasks/components/TaskCardViewComments.vue'
-import { useTasksStore } from "@/store";
+import { useAuthStore, useTasksStore } from "@/store";
 
-const router = useRouter()
-const route = useRoute()
+const router = useRouter();
+const route = useRoute();
 
-const tasksStore = useTasksStore()
+const tasksStore = useTasksStore();
+const authStore = useAuthStore();
 
 const dialog = ref(null)
 
@@ -155,7 +157,7 @@ onMounted(() => {
 
 // Найдем задачу по id из массива задач
 const task = computed(() => {
-  return tasksStore.tasks.find(task => task.id == route.params.id)
+  return tasksStore.getTaskById(route.params.id)
 })
 
 const dueDate = computed(() => {

@@ -6,17 +6,19 @@
 
 <script setup>
 import { AppLayout } from '@/layouts'
-import { useColumnsStore, useCommentsStore, useTasksStore, useUsersStore } from "@/store";
+import { useColumnsStore, useCommentsStore, useTasksStore, useTicksStore, useUsersStore } from "@/store";
 
 const tasksStore = useTasksStore();
 const usersStore = useUsersStore();
 const columnsStore = useColumnsStore();
-const commentStore = useCommentsStore();
+const commentsStore = useCommentsStore();
+const ticksStore = useTicksStore();
 
-void tasksStore.fetchTasks();
-void usersStore.fetchUsers();
-void columnsStore.fetchColumns();
-void commentStore.fetchComments();
+void tasksStore.fetchTasks()
+void usersStore.fetchUsers()
+void columnsStore.fetchColumns()
+void commentsStore.fetchComments()
+void ticksStore.fetchTicks()
 </script>
 
 <style lang="scss">

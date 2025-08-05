@@ -16,7 +16,7 @@ export const useCommentsStore = defineStore(
           .map(comment =>
             ({
               ...comment,
-              user: usersStore.findUserById(comment.userId)
+              user: usersStore.getUserById(comment.userId)
             })
           )
       }
